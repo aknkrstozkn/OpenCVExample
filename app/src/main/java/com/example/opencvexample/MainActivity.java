@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -29,10 +31,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Display display = getWindowManager().getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
 
         javaCameraView = (JavaCameraView) findViewById(R.id.cameraView);
+
+
+
         javaCameraView.setVisibility(SurfaceView.VISIBLE);
         javaCameraView.setCvCameraViewListener(this);
+
+        
+        javaCameraView.disableView();
+        javaCameraView.enableView();
     }
 
     static
@@ -92,16 +107,10 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private BaseLoaderCallback baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case BaseLoaderCallback.SUCCESS: {
-                    javaCameraView.enableView();
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
-            }
+            if(status == BaseLoaderCallback.SUCCESS)
+                javaCameraView.enableView();
+            else
+                super.onManagerConnected(status);
         }
     };
 
@@ -127,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         Point rect_ePoint = new Point((frame_width * 5) / 8, (frame_height * 4) / 5);
         Imgproc.rectangle(input, rect_sPoint, rect_ePoint, new Scalar(50, 205, 50), 3);
 
+        /**
         //Line 1
         Point line_sPoint = new Point((frame_width * 3) / 8, (frame_height * 2) / 5);
         Point line_ePoint = new Point((frame_width * 5) / 8, (frame_height * 2) / 5);
@@ -135,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         line_sPoint = new Point((frame_width * 3) / 8, (frame_height * 3) / 5);
         line_ePoint = new Point((frame_width * 5) / 8, (frame_height * 3) / 5);
         Imgproc.line(input, line_sPoint, line_ePoint, new Scalar(50, 205, 50), 3);
+        **/
 
         if (circles.cols() > 0) {
             for (int x=0; x < Math.min(circles.cols(), 2); x++ ) {
